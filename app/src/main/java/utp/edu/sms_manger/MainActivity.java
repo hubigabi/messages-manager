@@ -1,12 +1,17 @@
 package utp.edu.sms_manger;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -34,7 +39,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -44,6 +48,7 @@ import java.util.Optional;
 public class MainActivity extends AppCompatActivity implements SensorEventListener, ContactRecyclerViewAdapter.ItemClickListener {
 
     private static final String TAG = "Main Activity";
+    private static final String CHANNEL_ID = "CHANNEL_1";
     private SensorManager sensorManager;
     private Sensor accelerometer;
     private Sensor magnetometer;
@@ -137,20 +142,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         adapter = new ContactRecyclerViewAdapter(this, contacts);
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
+
+        createChannel();
     }
 
     private void displaySMS(String number, String message) {
-        String date = getDate("HH:mm dd/MM/yyyy");
+        String date = getDate();
 
-        String s = "\nPhone number: " + number + "\n" +
-                "Date: " + date + "\n" +
-                "Message: " + message + "\n";
-        receivedMessages += s;
+        String text = number + "\n" + date + "\n" + message;
+        receivedMessages += text + "\n\n";
         smsReceivedTextView.setText(receivedMessages);
+
+        displayNotification("New message", text);
     }
 
-    private String getDate(String dateFormat) {
-        DateFormat formatter = new SimpleDateFormat(dateFormat);
+    private String getDate() {
+        DateFormat formatter = DateFormat.getDateTimeInstance();
 
         Calendar calendar = Calendar.getInstance();
         return formatter.format(calendar.getTime());
@@ -219,13 +226,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
+    public void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
         savedInstanceState.putString("messages", receivedMessages);
     }
 
     @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
+    public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         Optional<String> messages = Optional.ofNullable(savedInstanceState.getString("messages"));
         messages.ifPresent(s -> {
@@ -235,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == REQUEST_CODE) {
             if (grantResults.length > 0 &&
                     grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -323,4 +330,32 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         Toast.makeText(this, "You selected " + contact.getName() + " with number: " + contact.getNumber(), Toast.LENGTH_SHORT).show();
         phoneNumberEditText.setText(contact.getNumber());
     }
+
+    private void createChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    private void displayNotification(String title, String contentText) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setContentTitle(title)
+                .setContentText(contentText)
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(contentText))
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+        notificationManager.notify(1, builder.build());
+    }
+
 }
