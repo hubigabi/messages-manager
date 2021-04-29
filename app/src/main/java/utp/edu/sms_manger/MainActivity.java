@@ -30,6 +30,7 @@ import android.provider.ContactsContract;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
@@ -38,6 +39,9 @@ import android.widget.EditText;
 
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -362,6 +366,42 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(1, builder.build());
+    }
+
+    public void scan(View view) {
+        IntentIntegrator integrator = new IntentIntegrator(this);
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
+        integrator.setPrompt("Scan a barcode");
+        integrator.setCameraId(0);
+        integrator.setBeepEnabled(false);
+        integrator.setBarcodeImageEnabled(true);
+        integrator.initiateScan();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (result != null) {
+            if (result.getContents() == null) {
+                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+                Log.d(TAG, "----------------------");
+                Log.d(TAG, result.toString());
+                addScannedBarcodeToSMS(result);
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    private void addScannedBarcodeToSMS(IntentResult intentResult) {
+        if (TextUtils.isEmpty(smsEditText.getText())) {
+            smsEditText.setText(intentResult.getContents());
+        } else {
+            smsEditText.append(System.lineSeparator());
+            smsEditText.append(intentResult.getContents());
+        }
     }
 
 }

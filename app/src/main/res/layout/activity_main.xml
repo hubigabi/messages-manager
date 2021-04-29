@@ -42,11 +42,20 @@
             android:onClick="sendSMS"
             android:text="Send" />
 
+        <Button
+            android:id="@+id/scan_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/send_button"
+            android:layout_centerHorizontal="true"
+            android:onClick="scan"
+            android:text="Scan" />
+
         <TextView
             android:id="@+id/azimuth_text_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/send_button"
+            android:layout_below="@id/scan_button"
             android:paddingTop="30dp"
             android:text="Azimuth: "
             android:textSize="18sp" />
