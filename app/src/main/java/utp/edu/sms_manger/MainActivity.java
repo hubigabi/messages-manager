@@ -48,7 +48,7 @@ import java.util.Optional;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener, ContactRecyclerViewAdapter.ItemClickListener {
 
-    private static final String TAG = "Main Activity";
+    private static final String TAG = MainActivity.class.getSimpleName();
     private static final String CHANNEL_ID = "CHANNEL_1";
     private SensorManager sensorManager;
     private Sensor accelerometer;
