@@ -14,23 +14,23 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:text="SMS Manager"
-            android:textSize="20dp" />
+            android:text="@string/sms_manager_text_view_text"
+            android:textSize="20sp" />
 
         <EditText
             android:id="@+id/phone_number_edit_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/sms_manager_text_view"
-            android:hint="Phone number"
-            android:inputType="number" />
+            android:hint="@string/hone_number_edit_text_hint"
+            android:inputType="phone" />
 
         <EditText
             android:id="@+id/sms_text_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/phone_number_edit_text"
-            android:hint="SMS Text"
+            android:hint="@string/sms_text_edit_text_hint"
             android:inputType="text|textMultiLine" />
 
         <Button
@@ -40,7 +40,7 @@
             android:layout_below="@id/sms_text_edit_text"
             android:layout_centerHorizontal="true"
             android:onClick="sendSMS"
-            android:text="Send" />
+            android:text="@string/send_button_text" />
 
         <Button
             android:id="@+id/scan_button"
@@ -49,16 +49,32 @@
             android:layout_below="@id/send_button"
             android:layout_centerHorizontal="true"
             android:onClick="scan"
-            android:text="Scan" />
+            android:text="@string/scan_button_text" />
+
+        <CheckBox
+            android:id="@+id/scanner_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/scan_button"
+            android:layout_alignParentEnd="true"
+            android:text="@string/scanner_checkbox_text" />
 
         <TextView
             android:id="@+id/azimuth_text_view"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/scan_button"
             android:paddingTop="30dp"
-            android:text="Azimuth: "
+            android:text="@string/azimuth_text_view_text"
             android:textSize="18sp" />
+
+        <CheckBox
+            android:id="@+id/azimuth_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/azimuth_text_view"
+            android:layout_alignParentEnd="true"
+            android:text="@string/azimuth_checkbox_text" />
 
         <TextView
             android:id="@+id/sms_received_text_view"
@@ -75,8 +91,8 @@
             android:layout_below="@id/sms_received_text_view"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="15dp"
-            android:text="Contacts"
-            android:textSize="22dp" />
+            android:text="@string/contacts_text_view_text"
+            android:textSize="22sp" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/contacts_recycler_view"

@@ -35,6 +35,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 
 import android.widget.TextView;
@@ -69,6 +70,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Button sendButton;
     private TextView azimuthTextView;
     private TextView smsReceivedTextView;
+    private CheckBox scannerCheckBox;
+    private CheckBox azimuthCheckBox;
 
     private static final int REQUEST_CODE = 1;
     private String receivedMessages = "SMS:\n";
@@ -87,6 +90,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         smsReceivedTextView = findViewById(R.id.sms_received_text_view);
         sendButton = findViewById(R.id.send_button);
         azimuthTextView = findViewById(R.id.azimuth_text_view);
+        scannerCheckBox = findViewById(R.id.scanner_checkbox);
+        azimuthCheckBox = findViewById(R.id.azimuth_checkbox);
 
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -171,7 +176,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void sendSMS(View view) {
         String destinationAddress = phoneNumberEditText.getText().toString();
         String text = smsEditText.getText().toString();
-        text += "\nAzimuth: " + azimuthToDegrees(azimuth);
+
+        if (azimuthCheckBox.isChecked()) {
+            text += "\nAzimuth: " + azimuthToDegrees(azimuth);
+        }
 
         smsManager.sendTextMessage(destinationAddress, null, text, null, null);
         Toast.makeText(MainActivity.this, "SMS sent successfully", Toast.LENGTH_SHORT).show();
@@ -386,9 +394,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(this, "Scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
-                Log.d(TAG, "----------------------");
-                Log.d(TAG, result.toString());
-                addScannedBarcodeToSMS(result);
+
+                if (scannerCheckBox.isChecked()) {
+                    addScannedBarcodeToSMS(result);
+                }
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data);

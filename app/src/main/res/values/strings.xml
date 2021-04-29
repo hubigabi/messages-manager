@@ -2,4 +2,13 @@
     <string name="app_name">SMS-manger</string>
     <string name="channel_name">channel_1</string>
     <string name="channel_description">channel_1</string>
+    <string name="contacts_text_view_text">Contacts</string>
+    <string name="azimuth_text_view_text">Azimuth:</string>
+    <string name="scanner_checkbox_text">Attach</string>
+    <string name="scan_button_text">Scan</string>
+    <string name="send_button_text">Send</string>
+    <string name="sms_text_edit_text_hint">SMS Text</string>
+    <string name="hone_number_edit_text_hint">Phone number</string>
+    <string name="sms_manager_text_view_text">SMS Manager</string>
+    <string name="azimuth_checkbox_text">Attach</string>
 </resources>
