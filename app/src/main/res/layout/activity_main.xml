@@ -98,7 +98,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/sms_recycler_view"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="20dp"
             android:text="@string/contacts_text_view_text"
             android:textSize="22sp" />
 
