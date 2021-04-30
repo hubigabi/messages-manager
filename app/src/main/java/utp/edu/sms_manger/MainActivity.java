@@ -37,21 +37,23 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener, ContactRecyclerViewAdapter.ItemClickListener {
+import utp.edu.sms_manger.adapter.ContactRecyclerViewAdapter;
+import utp.edu.sms_manger.adapter.SmsRecyclerViewAdapter;
+import utp.edu.sms_manger.model.Contact;
+import utp.edu.sms_manger.model.Sms;
+
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String CHANNEL_ID = "CHANNEL_1";
@@ -69,16 +71,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private EditText smsEditText;
     private Button sendButton;
     private TextView azimuthTextView;
-    private TextView smsReceivedTextView;
     private CheckBox scannerCheckBox;
     private CheckBox azimuthCheckBox;
 
-    private static final int REQUEST_CODE = 1;
-    private String receivedMessages = "SMS:\n";
-
-    private ContactRecyclerViewAdapter adapter;
+    private SmsRecyclerViewAdapter smsAdapter;
+    private ContactRecyclerViewAdapter contactAdapter;
     private static boolean initContactListFlag = false;
+    private static List<Sms> smsReceived = new ArrayList<>();
     private static List<Contact> contacts = new ArrayList<>();
+    private static final int REQUEST_CODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +88,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         phoneNumberEditText = findViewById(R.id.phone_number_edit_text);
         smsEditText = findViewById(R.id.sms_text_edit_text);
-        smsReceivedTextView = findViewById(R.id.sms_received_text_view);
         sendButton = findViewById(R.id.send_button);
         azimuthTextView = findViewById(R.id.azimuth_text_view);
         scannerCheckBox = findViewById(R.id.scanner_checkbox);
@@ -108,7 +108,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             initAfterPermissionsGranted();
         }
 
-        smsReceivedTextView.setText(receivedMessages);
         sendButton.setEnabled(false);
         phoneNumberEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -140,37 +139,43 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             @Override
             public void afterTextChanged(Editable s) {
-
             }
         });
 
-        RecyclerView recyclerView = findViewById(R.id.contacts_recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL);
-        recyclerView.addItemDecoration(dividerItemDecoration);
+        RecyclerView smsRecyclerView = findViewById(R.id.sms_recycler_view);
+        smsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        DividerItemDecoration smsDividerItemDecoration = new DividerItemDecoration(smsRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
+        smsRecyclerView.addItemDecoration(smsDividerItemDecoration);
 
-        adapter = new ContactRecyclerViewAdapter(this, contacts);
-        adapter.setClickListener(this);
-        recyclerView.setAdapter(adapter);
+        smsAdapter = new SmsRecyclerViewAdapter(this, smsReceived);
+        smsAdapter.setClickListener((view, position) -> {
+            Sms sms = smsAdapter.getItem(position);
+            Toast.makeText(this, sms.getMessage(), Toast.LENGTH_SHORT).show();
+        });
+        smsRecyclerView.setAdapter(smsAdapter);
+
+        RecyclerView contactsRecyclerView = findViewById(R.id.contacts_recycler_view);
+        contactsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        DividerItemDecoration contactsDividerItemDecoration = new DividerItemDecoration(contactsRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
+        contactsRecyclerView.addItemDecoration(contactsDividerItemDecoration);
+
+        contactAdapter = new ContactRecyclerViewAdapter(this, contacts);
+        contactAdapter.setClickListener((view, position) -> {
+            Contact contact = contactAdapter.getItem(position);
+            Toast.makeText(this, "You selected " + contact.getName() + " with number: " + contact.getNumber(), Toast.LENGTH_SHORT).show();
+            phoneNumberEditText.setText(contact.getNumber());
+        });
+        contactsRecyclerView.setAdapter(contactAdapter);
 
         createChannel();
     }
 
-    private void displaySMS(String number, String message) {
-        String date = getDate();
+    private void receiveSMS(String number, String message) {
+        Sms sms = new Sms(message, number, new Date());
+        smsReceived.add(sms);
+        smsAdapter.notifyItemInserted(smsReceived.size() - 1);
 
-        String text = number + "\n" + date + "\n" + message;
-        receivedMessages += text + "\n\n";
-        smsReceivedTextView.setText(receivedMessages);
-
-        displayNotification("New message", text);
-    }
-
-    private String getDate() {
-        DateFormat formatter = DateFormat.getDateTimeInstance();
-
-        Calendar calendar = Calendar.getInstance();
-        return formatter.format(calendar.getTime());
+        displayNotification("New message", message);
     }
 
     public void sendSMS(View view) {
@@ -178,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         String text = smsEditText.getText().toString();
 
         if (azimuthCheckBox.isChecked()) {
-            text += "\nAzimuth: " + azimuthToDegrees(azimuth);
+            text += System.lineSeparator() + "Azimuth: " + azimuthToDegrees(azimuth);
         }
 
         smsManager.sendTextMessage(destinationAddress, null, text, null, null);
@@ -241,17 +246,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putString("messages", receivedMessages);
     }
 
     @Override
     public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        Optional<String> messages = Optional.ofNullable(savedInstanceState.getString("messages"));
-        messages.ifPresent(s -> {
-            receivedMessages = s;
-            smsReceivedTextView.setText(receivedMessages);
-        });
     }
 
     @Override
@@ -289,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             msgs[i] = SmsMessage.createFromPdu((byte[]) pdus[i]);
                         }
                         Toast.makeText(context, "New SMS", Toast.LENGTH_LONG).show();
-                        displaySMS(msgs[i].getOriginatingAddress(), msgs[i].getMessageBody());
+                        receiveSMS(msgs[i].getOriginatingAddress(), msgs[i].getMessageBody());
                     }
                 }
             }
@@ -335,13 +334,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
         contacts.sort(Comparator.comparing(Contact::getName));
         return contacts;
-    }
-
-    @Override
-    public void onItemClick(View view, int position) {
-        Contact contact = adapter.getItem(position);
-        Toast.makeText(this, "You selected " + contact.getName() + " with number: " + contact.getNumber(), Toast.LENGTH_SHORT).show();
-        phoneNumberEditText.setText(contact.getNumber());
     }
 
     private void createChannel() {

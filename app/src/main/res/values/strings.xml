@@ -11,4 +11,5 @@
     <string name="hone_number_edit_text_hint">Phone number</string>
     <string name="sms_manager_text_view_text">SMS Manager</string>
     <string name="azimuth_checkbox_text">Attach</string>
+    <string name="sms_text_view_text">SMS</string>
 </resources>

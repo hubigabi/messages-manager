@@ -1,4 +1,4 @@
-package utp.edu.sms_manger;
+package utp.edu.sms_manger.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -10,13 +10,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
+import utp.edu.sms_manger.R;
+import utp.edu.sms_manger.model.Contact;
+
 public class ContactRecyclerViewAdapter extends RecyclerView.Adapter<ContactRecyclerViewAdapter.ViewHolder> {
 
     private List<Contact> contacts;
     private LayoutInflater layoutInflater;
     private ItemClickListener itemClickListener;
 
-    ContactRecyclerViewAdapter(Context context, List<Contact> data) {
+    public ContactRecyclerViewAdapter(Context context, List<Contact> data) {
         this.layoutInflater = LayoutInflater.from(context);
         this.contacts = data;
     }
@@ -39,7 +42,6 @@ public class ContactRecyclerViewAdapter extends RecyclerView.Adapter<ContactRecy
         return contacts.size();
     }
 
-
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView nameTextView;
         TextView phoneTextView;
@@ -58,11 +60,11 @@ public class ContactRecyclerViewAdapter extends RecyclerView.Adapter<ContactRecy
         }
     }
 
-    Contact getItem(int id) {
+    public Contact getItem(int id) {
         return contacts.get(id);
     }
 
-    void setClickListener(ItemClickListener itemClickListener) {
+    public void setClickListener(ItemClickListener itemClickListener) {
         this.itemClickListener = itemClickListener;
     }
 
