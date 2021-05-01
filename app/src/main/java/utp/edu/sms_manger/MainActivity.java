@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import utp.edu.sms_manger.adapter.ContactRecyclerViewAdapter;
 import utp.edu.sms_manger.adapter.SmsRecyclerViewAdapter;
@@ -141,6 +142,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void afterTextChanged(Editable s) {
             }
         });
+        scannerCheckBox.setChecked(true);
+        azimuthCheckBox.setChecked(true);
 
         RecyclerView smsRecyclerView = findViewById(R.id.sms_recycler_view);
         smsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -171,6 +174,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void receiveSMS(String number, String message) {
+        final String num = number;
+
+        Optional<Contact> contact = contacts.stream()
+                .filter(c -> num.contains(c.getNumber().replaceAll("\\s", "")))
+                .findFirst();
+
+        if (contact.isPresent() && contact.get().getNumber() != null) {
+            number = contact.get().getName();
+        }
+
         Sms sms = new Sms(message, number, new Date());
         smsReceived.add(sms);
         smsAdapter.notifyItemInserted(smsReceived.size() - 1);
