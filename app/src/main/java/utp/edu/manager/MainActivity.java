@@ -177,23 +177,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         createChannel();
 
-
-        Disposable subscribe1 = AppDatabase.getInstance(getApplicationContext())
-                .messageDao()
-                .insert(new Message("fdsfdsf", "fdfdfdf", new Date(), MessageType.SENT))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(() -> System.out.println("Finish"));
-
-        Disposable subscribe = AppDatabase.getInstance(getApplicationContext()).messageDao().getAll()
+        Disposable disposable = AppDatabase.getInstance(getApplicationContext()).messageDao().getByTypeWithLimit(MessageType.RECEIVED, 5)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(messages -> {
-                    System.out.println("----------------------------");
-                    System.out.println(messages.size());
-                    messages.forEach(System.out::println);
-                    Toast.makeText(MainActivity.this, "SMS sent successfully", Toast.LENGTH_SHORT).show();
-                }, throwable -> Log.e(TAG, "Unable to get username", throwable));
+                    messageReceived.clear();
+                    messageReceived.addAll(messages);
+                    messageAdapter.notifyDataSetChanged();
+                }, throwable -> Log.e(TAG, "Unable to get messages", throwable));
     }
 
     private void receiveSMS(String number, String text) {
@@ -208,10 +199,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
 
         Message message = new Message(text, number, new Date(), MessageType.RECEIVED);
-        messageReceived.add(message);
-        messageAdapter.notifyItemInserted(messageReceived.size() - 1);
+        messageReceived.add(0, message);
+        messageAdapter.notifyItemInserted(0);
 
         displayNotification("New message", text);
+
+        Disposable disposable = AppDatabase.getInstance(getApplicationContext())
+                .messageDao()
+                .insert(message)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(() -> Log.i(TAG, "Inserted a new message to db"));
     }
 
     public void sendSMS(View view) {
@@ -225,6 +223,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         smsManager.sendTextMessage(destinationAddress, null, text, null, null);
         Toast.makeText(MainActivity.this, "SMS sent successfully", Toast.LENGTH_SHORT).show();
         messageEditText.setText("");
+
+        Disposable disposable = AppDatabase.getInstance(getApplicationContext())
+                .messageDao()
+                .insert(new Message(text, destinationAddress, new Date(), MessageType.SENT))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(() -> Log.i(TAG, "Inserted a new message to db"));
     }
 
     @Override
@@ -269,7 +274,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         Log.i(TAG, "Accuracy changed");
     }
-
 
     public float azimuthToDegrees(float azimuthInRadians) {
         float azimuthInDegrees = (float) Math.toDegrees(azimuthInRadians);
@@ -346,7 +350,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 null, null, null, null);
 
         if ((cur != null ? cur.getCount() : 0) > 0) {
-            while (cur != null && cur.moveToNext()) {
+            while (cur.moveToNext()) {
                 String id = cur.getString(cur.getColumnIndex(ContactsContract.Contacts._ID));
                 String name = cur.getString(cur.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
                 Contact contact = new Contact(Long.parseLong(id), name);
