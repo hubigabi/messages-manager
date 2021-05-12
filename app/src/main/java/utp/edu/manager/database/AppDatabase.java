@@ -1,4 +1,4 @@
-package utp.edu.sms_manger.database;
+package utp.edu.manager.database;
 
 import android.content.Context;
 
@@ -7,8 +7,8 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
-import utp.edu.sms_manger.dao.MessageDao;
-import utp.edu.sms_manger.model.Message;
+import utp.edu.manager.dao.MessageDao;
+import utp.edu.manager.model.Message;
 
 @Database(entities = {Message.class}, version = 1)
 @TypeConverters({Converter.class})

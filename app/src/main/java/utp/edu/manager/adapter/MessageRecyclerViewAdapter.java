@@ -1,4 +1,4 @@
-package utp.edu.sms_manger.adapter;
+package utp.edu.manager.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -11,8 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.text.DateFormat;
 import java.util.List;
 
-import utp.edu.sms_manger.R;
-import utp.edu.sms_manger.model.Message;
+import utp.edu.manager.R;
+import utp.edu.manager.model.Message;
 
 public class MessageRecyclerViewAdapter extends RecyclerView.Adapter<MessageRecyclerViewAdapter.ViewHolder> {
 
@@ -28,7 +28,7 @@ public class MessageRecyclerViewAdapter extends RecyclerView.Adapter<MessageRecy
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = layoutInflater.inflate(R.layout.sms_row, parent, false);
+        View view = layoutInflater.inflate(R.layout.message_row, parent, false);
         return new ViewHolder(view);
     }
 

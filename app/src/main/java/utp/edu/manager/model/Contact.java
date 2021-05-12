@@ -1,4 +1,4 @@
-package utp.edu.sms_manger.model;
+package utp.edu.manager.model;
 
 public class Contact {
 

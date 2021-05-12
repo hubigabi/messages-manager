@@ -9,35 +9,26 @@
         android:paddingLeft="16dp"
         android:paddingRight="16dp">
 
-        <TextView
-            android:id="@+id/sms_manager_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:text="@string/sms_manager_text_view_text"
-            android:textSize="20sp" />
-
         <EditText
             android:id="@+id/phone_number_edit_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/sms_manager_text_view"
             android:hint="@string/hone_number_edit_text_hint"
             android:inputType="phone" />
 
         <EditText
-            android:id="@+id/sms_text_edit_text"
+            android:id="@+id/message_text_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/phone_number_edit_text"
-            android:hint="@string/sms_text_edit_text_hint"
+            android:hint="@string/message_text_edit_text_hint"
             android:inputType="text|textMultiLine" />
 
         <Button
             android:id="@+id/send_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/sms_text_edit_text"
+            android:layout_below="@id/message_text_edit_text"
             android:layout_centerHorizontal="true"
             android:onClick="sendSMS"
             android:text="@string/send_button_text" />
@@ -77,26 +68,26 @@
             android:text="@string/azimuth_checkbox_text" />
 
         <TextView
-            android:id="@+id/sms_text_view"
+            android:id="@+id/message_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/azimuth_checkbox"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="15dp"
-            android:text="@string/sms_text_view_text"
+            android:text="@string/message_text_view_text"
             android:textSize="22sp" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/sms_recycler_view"
+            android:id="@+id/message_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/sms_text_view" />
+            android:layout_below="@id/message_text_view" />
 
         <TextView
             android:id="@+id/contacts_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/sms_recycler_view"
+            android:layout_below="@id/message_recycler_view"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="20dp"
             android:text="@string/contacts_text_view_text"

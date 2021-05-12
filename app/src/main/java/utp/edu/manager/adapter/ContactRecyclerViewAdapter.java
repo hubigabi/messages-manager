@@ -1,4 +1,4 @@
-package utp.edu.sms_manger.adapter;
+package utp.edu.manager.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -10,8 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-import utp.edu.sms_manger.R;
-import utp.edu.sms_manger.model.Contact;
+import utp.edu.manager.R;
+import utp.edu.manager.model.Contact;
 
 public class ContactRecyclerViewAdapter extends RecyclerView.Adapter<ContactRecyclerViewAdapter.ViewHolder> {
 

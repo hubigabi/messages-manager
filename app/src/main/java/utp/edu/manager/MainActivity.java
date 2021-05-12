@@ -1,12 +1,4 @@
-package utp.edu.sms_manger;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+package utp.edu.manager;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -40,6 +32,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -49,11 +49,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import utp.edu.sms_manger.adapter.ContactRecyclerViewAdapter;
-import utp.edu.sms_manger.adapter.MessageRecyclerViewAdapter;
-import utp.edu.sms_manger.database.AppDatabase;
-import utp.edu.sms_manger.model.Contact;
-import utp.edu.sms_manger.model.Message;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import utp.edu.manager.adapter.ContactRecyclerViewAdapter;
+import utp.edu.manager.adapter.MessageRecyclerViewAdapter;
+import utp.edu.manager.database.AppDatabase;
+import utp.edu.manager.model.Contact;
+import utp.edu.manager.model.Message;
+import utp.edu.manager.model.MessageType;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -70,13 +74,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private BroadcastReceiver broadcastReceiver;
 
     private EditText phoneNumberEditText;
-    private EditText smsEditText;
+    private EditText messageEditText;
     private Button sendButton;
     private TextView azimuthTextView;
     private CheckBox scannerCheckBox;
     private CheckBox azimuthCheckBox;
 
-    private MessageRecyclerViewAdapter smsAdapter;
+    private MessageRecyclerViewAdapter messageAdapter;
     private ContactRecyclerViewAdapter contactAdapter;
     private static boolean initContactListFlag = false;
     private static List<Message> messageReceived = new ArrayList<>();
@@ -89,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
 
         phoneNumberEditText = findViewById(R.id.phone_number_edit_text);
-        smsEditText = findViewById(R.id.sms_text_edit_text);
+        messageEditText = findViewById(R.id.message_text_edit_text);
         sendButton = findViewById(R.id.send_button);
         azimuthTextView = findViewById(R.id.azimuth_text_view);
         scannerCheckBox = findViewById(R.id.scanner_checkbox);
@@ -115,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 sendButton.setEnabled((!phoneNumberEditText.getText().toString().trim().isEmpty())
-                        && (!smsEditText.getText().toString().trim().isEmpty()));
+                        && (!messageEditText.getText().toString().trim().isEmpty()));
             }
 
             @Override
@@ -128,11 +132,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 
-        smsEditText.addTextChangedListener(new TextWatcher() {
+        messageEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 sendButton.setEnabled((!phoneNumberEditText.getText().toString().trim().isEmpty())
-                        && (!smsEditText.getText().toString().trim().isEmpty()));
+                        && (!messageEditText.getText().toString().trim().isEmpty()));
             }
 
             @Override
@@ -146,17 +150,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         scannerCheckBox.setChecked(true);
         azimuthCheckBox.setChecked(true);
 
-        RecyclerView smsRecyclerView = findViewById(R.id.sms_recycler_view);
-        smsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        DividerItemDecoration smsDividerItemDecoration = new DividerItemDecoration(smsRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
-        smsRecyclerView.addItemDecoration(smsDividerItemDecoration);
+        RecyclerView messageRecyclerView = findViewById(R.id.message_recycler_view);
+        messageRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        DividerItemDecoration messageDividerItemDecoration = new DividerItemDecoration(messageRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
+        messageRecyclerView.addItemDecoration(messageDividerItemDecoration);
 
-        smsAdapter = new MessageRecyclerViewAdapter(this, messageReceived);
-        smsAdapter.setClickListener((view, position) -> {
-            Message message = smsAdapter.getItem(position);
+        messageAdapter = new MessageRecyclerViewAdapter(this, messageReceived);
+        messageAdapter.setClickListener((view, position) -> {
+            Message message = messageAdapter.getItem(position);
             Toast.makeText(this, message.getText(), Toast.LENGTH_SHORT).show();
         });
-        smsRecyclerView.setAdapter(smsAdapter);
+        messageRecyclerView.setAdapter(messageAdapter);
 
         RecyclerView contactsRecyclerView = findViewById(R.id.contacts_recycler_view);
         contactsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -173,25 +177,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         createChannel();
 
-        Thread t = new Thread(() -> {
-            AppDatabase.getInstance(getApplicationContext())
-                    .messageDao()
-                    .insert(new Message("fdsfdsf", "fdfdfdf", new Date()));
 
-            Log.d(TAG, "?????????????????????????????");
-        });
-        t.start();
+        Disposable subscribe1 = AppDatabase.getInstance(getApplicationContext())
+                .messageDao()
+                .insert(new Message("fdsfdsf", "fdfdfdf", new Date(), MessageType.SENT))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(() -> System.out.println("Finish"));
 
-        Thread thread = new Thread(() -> {
-            List<Message> todoList = AppDatabase.getInstance(getApplicationContext())
-                    .messageDao()
-                    .getAll();
-
-            Log.d(TAG, "---------------------------------");
-            todoList.forEach(System.out::println);
-//            Toast.makeText(this, String.valueOf(todoList.size()), Toast.LENGTH_SHORT).show();
-        });
-        thread.start();
+        Disposable subscribe = AppDatabase.getInstance(getApplicationContext()).messageDao().getAll()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(messages -> {
+                    System.out.println("----------------------------");
+                    System.out.println(messages.size());
+                    messages.forEach(System.out::println);
+                    Toast.makeText(MainActivity.this, "SMS sent successfully", Toast.LENGTH_SHORT).show();
+                }, throwable -> Log.e(TAG, "Unable to get username", throwable));
     }
 
     private void receiveSMS(String number, String text) {
@@ -205,16 +207,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             number = contact.get().getName();
         }
 
-        Message message = new Message(text, number, new Date());
+        Message message = new Message(text, number, new Date(), MessageType.RECEIVED);
         messageReceived.add(message);
-        smsAdapter.notifyItemInserted(messageReceived.size() - 1);
+        messageAdapter.notifyItemInserted(messageReceived.size() - 1);
 
         displayNotification("New message", text);
     }
 
     public void sendSMS(View view) {
         String destinationAddress = phoneNumberEditText.getText().toString();
-        String text = smsEditText.getText().toString();
+        String text = messageEditText.getText().toString();
 
         if (azimuthCheckBox.isChecked()) {
             text += System.lineSeparator() + "Azimuth: " + azimuthToDegrees(azimuth);
@@ -222,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         smsManager.sendTextMessage(destinationAddress, null, text, null, null);
         Toast.makeText(MainActivity.this, "SMS sent successfully", Toast.LENGTH_SHORT).show();
-        smsEditText.setText("");
+        messageEditText.setText("");
     }
 
     @Override
@@ -431,11 +433,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void addScannedBarcodeToSMS(IntentResult intentResult) {
-        if (TextUtils.isEmpty(smsEditText.getText())) {
-            smsEditText.setText(intentResult.getContents());
+        if (TextUtils.isEmpty(messageEditText.getText())) {
+            messageEditText.setText(intentResult.getContents());
         } else {
-            smsEditText.append(System.lineSeparator());
-            smsEditText.append(intentResult.getContents());
+            messageEditText.append(System.lineSeparator());
+            messageEditText.append(intentResult.getContents());
         }
     }
 

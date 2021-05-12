@@ -1,7 +1,6 @@
-package utp.edu.sms_manger.model;
+package utp.edu.manager.model;
 
 import androidx.room.Entity;
-import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import java.util.Date;
@@ -15,14 +14,17 @@ public class Message {
     private String text;
     private String number;
     private Date date;
+    private MessageType messageType;
 
     public Message() {
     }
 
-    public Message(String text, String number, Date date) {
+    public Message(String text, String number, Date date, MessageType messageType) {
+        this.id = id;
         this.text = text;
         this.number = number;
         this.date = date;
+        this.messageType = messageType;
     }
 
     public int getId() {
@@ -57,6 +59,14 @@ public class Message {
         this.date = date;
     }
 
+    public MessageType getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(MessageType messageType) {
+        this.messageType = messageType;
+    }
+
     @Override
     public String toString() {
         return "Message{" +
@@ -64,6 +74,7 @@ public class Message {
                 ", text='" + text + '\'' +
                 ", number='" + number + '\'' +
                 ", date=" + date +
+                ", messageType=" + messageType +
                 '}';
     }
 }

@@ -1,4 +1,4 @@
-package utp.edu.sms_manger.database;
+package utp.edu.manager.database;
 
 import androidx.room.TypeConverter;
 
