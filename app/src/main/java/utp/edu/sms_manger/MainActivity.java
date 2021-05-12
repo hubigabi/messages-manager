@@ -50,9 +50,10 @@ import java.util.List;
 import java.util.Optional;
 
 import utp.edu.sms_manger.adapter.ContactRecyclerViewAdapter;
-import utp.edu.sms_manger.adapter.SmsRecyclerViewAdapter;
+import utp.edu.sms_manger.adapter.MessageRecyclerViewAdapter;
+import utp.edu.sms_manger.database.AppDatabase;
 import utp.edu.sms_manger.model.Contact;
-import utp.edu.sms_manger.model.Sms;
+import utp.edu.sms_manger.model.Message;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -75,10 +76,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private CheckBox scannerCheckBox;
     private CheckBox azimuthCheckBox;
 
-    private SmsRecyclerViewAdapter smsAdapter;
+    private MessageRecyclerViewAdapter smsAdapter;
     private ContactRecyclerViewAdapter contactAdapter;
     private static boolean initContactListFlag = false;
-    private static List<Sms> smsReceived = new ArrayList<>();
+    private static List<Message> messageReceived = new ArrayList<>();
     private static List<Contact> contacts = new ArrayList<>();
     private static final int REQUEST_CODE = 1;
 
@@ -150,10 +151,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         DividerItemDecoration smsDividerItemDecoration = new DividerItemDecoration(smsRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
         smsRecyclerView.addItemDecoration(smsDividerItemDecoration);
 
-        smsAdapter = new SmsRecyclerViewAdapter(this, smsReceived);
+        smsAdapter = new MessageRecyclerViewAdapter(this, messageReceived);
         smsAdapter.setClickListener((view, position) -> {
-            Sms sms = smsAdapter.getItem(position);
-            Toast.makeText(this, sms.getMessage(), Toast.LENGTH_SHORT).show();
+            Message message = smsAdapter.getItem(position);
+            Toast.makeText(this, message.getText(), Toast.LENGTH_SHORT).show();
         });
         smsRecyclerView.setAdapter(smsAdapter);
 
@@ -171,9 +172,29 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         contactsRecyclerView.setAdapter(contactAdapter);
 
         createChannel();
+
+        Thread t = new Thread(() -> {
+            AppDatabase.getInstance(getApplicationContext())
+                    .messageDao()
+                    .insert(new Message("fdsfdsf", "fdfdfdf", new Date()));
+
+            Log.d(TAG, "?????????????????????????????");
+        });
+        t.start();
+
+        Thread thread = new Thread(() -> {
+            List<Message> todoList = AppDatabase.getInstance(getApplicationContext())
+                    .messageDao()
+                    .getAll();
+
+            Log.d(TAG, "---------------------------------");
+            todoList.forEach(System.out::println);
+//            Toast.makeText(this, String.valueOf(todoList.size()), Toast.LENGTH_SHORT).show();
+        });
+        thread.start();
     }
 
-    private void receiveSMS(String number, String message) {
+    private void receiveSMS(String number, String text) {
         final String num = number;
 
         Optional<Contact> contact = contacts.stream()
@@ -184,11 +205,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             number = contact.get().getName();
         }
 
-        Sms sms = new Sms(message, number, new Date());
-        smsReceived.add(sms);
-        smsAdapter.notifyItemInserted(smsReceived.size() - 1);
+        Message message = new Message(text, number, new Date());
+        messageReceived.add(message);
+        smsAdapter.notifyItemInserted(messageReceived.size() - 1);
 
-        displayNotification("New message", message);
+        displayNotification("New message", text);
     }
 
     public void sendSMS(View view) {

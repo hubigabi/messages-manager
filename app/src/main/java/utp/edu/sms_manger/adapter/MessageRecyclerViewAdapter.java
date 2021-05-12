@@ -12,18 +12,18 @@ import java.text.DateFormat;
 import java.util.List;
 
 import utp.edu.sms_manger.R;
-import utp.edu.sms_manger.model.Sms;
+import utp.edu.sms_manger.model.Message;
 
-public class SmsRecyclerViewAdapter extends RecyclerView.Adapter<SmsRecyclerViewAdapter.ViewHolder> {
+public class MessageRecyclerViewAdapter extends RecyclerView.Adapter<MessageRecyclerViewAdapter.ViewHolder> {
 
-    private List<Sms> smsList;
+    private List<Message> messageList;
     private LayoutInflater layoutInflater;
     private ItemClickListener itemClickListener;
     private final DateFormat formatter = DateFormat.getDateTimeInstance();
 
-    public SmsRecyclerViewAdapter(Context context, List<Sms> data) {
+    public MessageRecyclerViewAdapter(Context context, List<Message> data) {
         this.layoutInflater = LayoutInflater.from(context);
-        this.smsList = data;
+        this.messageList = data;
     }
 
     @Override
@@ -34,15 +34,15 @@ public class SmsRecyclerViewAdapter extends RecyclerView.Adapter<SmsRecyclerView
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        Sms sms = smsList.get(position);
-        holder.dateTextView.setText(formatter.format(sms.getDate()));
-        holder.numberTextView.setText(sms.getNumber());
-        holder.messageTextView.setText(sms.getMessage());
+        Message message = messageList.get(position);
+        holder.dateTextView.setText(formatter.format(message.getDate()));
+        holder.numberTextView.setText(message.getNumber());
+        holder.messageTextView.setText(message.getText());
     }
 
     @Override
     public int getItemCount() {
-        return smsList.size();
+        return messageList.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -65,8 +65,8 @@ public class SmsRecyclerViewAdapter extends RecyclerView.Adapter<SmsRecyclerView
         }
     }
 
-    public Sms getItem(int id) {
-        return smsList.get(id);
+    public Message getItem(int id) {
+        return messageList.get(id);
     }
 
     public void setClickListener(ItemClickListener itemClickListener) {
