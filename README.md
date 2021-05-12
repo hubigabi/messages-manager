@@ -1,2 +1,2 @@
-# SMS Manager
-Android application to send and receive SMS
+# Messages manager
+Android application for managing messages.
