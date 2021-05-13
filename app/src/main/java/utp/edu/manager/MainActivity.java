@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private MessageRecyclerViewAdapter messageAdapter;
     private ContactRecyclerViewAdapter contactAdapter;
     private static boolean initContactListFlag = false;
-    private static List<Message> messageReceived = new ArrayList<>();
+    private static List<Message> messagesReceived = new ArrayList<>();
     private static List<Contact> contacts = new ArrayList<>();
     private static final int REQUEST_CODE = 1;
 
@@ -150,12 +150,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         scannerCheckBox.setChecked(true);
         azimuthCheckBox.setChecked(true);
 
-        RecyclerView messageRecyclerView = findViewById(R.id.message_recycler_view);
+        RecyclerView messageRecyclerView = findViewById(R.id.messages_received_recycler_view);
         messageRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         DividerItemDecoration messageDividerItemDecoration = new DividerItemDecoration(messageRecyclerView.getContext(), DividerItemDecoration.VERTICAL);
         messageRecyclerView.addItemDecoration(messageDividerItemDecoration);
 
-        messageAdapter = new MessageRecyclerViewAdapter(this, messageReceived);
+        messageAdapter = new MessageRecyclerViewAdapter(this, messagesReceived);
         messageAdapter.setClickListener((view, position) -> {
             Message message = messageAdapter.getItem(position);
             Toast.makeText(this, message.getText(), Toast.LENGTH_SHORT).show();
@@ -181,8 +181,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(messages -> {
-                    messageReceived.clear();
-                    messageReceived.addAll(messages);
+                    messagesReceived.clear();
+                    messagesReceived.addAll(messages);
                     messageAdapter.notifyDataSetChanged();
                 }, throwable -> Log.e(TAG, "Unable to get messages", throwable));
     }
@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
 
         Message message = new Message(text, number, new Date(), MessageType.RECEIVED);
-        messageReceived.add(0, message);
+        messagesReceived.add(0, message);
         messageAdapter.notifyItemInserted(0);
 
         displayNotification("New message", text);
@@ -445,4 +445,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
+    public void startDisplayMessagesActivity(View view) {
+        Intent intent = new Intent(this, DisplayMessagesActivity.class);
+        startActivity(intent);
+    }
 }

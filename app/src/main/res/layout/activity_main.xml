@@ -11,7 +11,7 @@
 
         <EditText
             android:id="@+id/phone_number_edit_text"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/hone_number_edit_text_hint"
             android:inputType="phone" />
@@ -67,18 +67,26 @@
             android:layout_alignParentEnd="true"
             android:text="@string/azimuth_checkbox_text" />
 
+        <Button
+            android:id="@+id/display_messages__button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/azimuth_checkbox"
+            android:onClick="startDisplayMessagesActivity"
+            android:text="@string/display_messages_text" />
+
         <TextView
             android:id="@+id/message_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/azimuth_checkbox"
+            android:layout_below="@id/display_messages__button"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="15dp"
             android:text="@string/message_text_view_text"
             android:textSize="22sp" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/message_recycler_view"
+            android:id="@+id/messages_received_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_below="@id/message_text_view" />
@@ -87,7 +95,7 @@
             android:id="@+id/contacts_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/message_recycler_view"
+            android:layout_below="@id/messages_received_recycler_view"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="20dp"
             android:text="@string/contacts_text_view_text"

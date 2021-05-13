@@ -12,4 +12,6 @@
     <string name="message_manager_text_view_text">Messages Manager</string>
     <string name="azimuth_checkbox_text">Attach</string>
     <string name="message_text_view_text">Messages</string>
+    <string name="display_messages_text">Display messages</string>
+    <string name="message_text">Sent messages</string>
 </resources>

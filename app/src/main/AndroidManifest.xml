@@ -3,12 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="utp.edu.manager">
 
+    <uses-sdk tools:overrideLibrary="com.google.zxing.client.android" />
+
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
-
-    <uses-sdk tools:overrideLibrary="com.google.zxing.client.android" />
 
     <application
         android:allowBackup="true"
@@ -19,12 +19,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Manager">
 
-        <activity android:name="utp.edu.manager.MainActivity">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".DisplayMessagesActivity"
+            android:parentActivityName=".MainActivity" />
 
     </application>
 
